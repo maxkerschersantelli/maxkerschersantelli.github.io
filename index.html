@@ -9,7 +9,7 @@
 
         <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
         <script src="https://webglfundamentals.org/webgl/resources/m4.js"></script>
-        
+
         <script  id="3d-vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_position;
             attribute vec4 a_color;
@@ -39,7 +39,36 @@
         </script>
     </head>
     <body onload="main()">
-        <canvas id="canvas"></canvas>
+        <div class="container">
+            <div class="text-section">
+                <h1>WebGL Game Engine</h1>
+                <h4>By Max Kerscher-Santelli</h4>
+                <div class="text">This is a from scratch 3D graphics renderer I have been working on in my spare time. I chose this project to learn more about the GPU and how developers can tke advantage of it. To get close to the GPU I have chosen to work with just WebGL. WebGL is the API your browser uses to comunicate with the GPU. Thanks for checking it out.</div>
+                <div class="text">You can view the source code at <a href="https://github.com/maxkerschersantelli/maxkerschersantelli.github.io">this Github Repo</a>. Most of the work you can find under scripts/main.js. My shaders are in index.html.</div>
+                <div class="feature-section">
+                    <div>
+                        <div>Current Features:</div>
+                        <ul>
+                            <li>Render Geometry</li>
+                            <li>Textures</li>
+                            <li>moveable camera</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div>Upcoming Features</div>
+                        <ul>
+                            <li>Light Sources</li>
+                            <li>Scene Graph</li>
+                            <li>More Complex Shaders</li>
+                            <li>Interactivity</li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+
     </body>
 
 </html>

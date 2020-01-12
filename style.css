@@ -3,11 +3,28 @@
 body {
   margin: 0;
 }
-canvas {
-  width: 100vw;
-  height: 100vh;
-  display: block;
+
+.container{
+    display: flex;
 }
-#ui {
-  width: 200px;
+
+#canvas {
+    width: 50%;
+    height: 100vh;
+}
+
+.text-section {
+    width: 50%;
+    height: 100vh;
+    background: lightblue;
+    padding: 20px;
+}
+
+.text {
+    margin-bottom: 10px;
+}
+
+.feature-section{
+    display:flex;
+    justify-content: space-around;
 }
