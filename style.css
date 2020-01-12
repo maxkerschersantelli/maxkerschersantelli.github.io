@@ -15,6 +15,7 @@ body {
     width: 50%;
     background: lightblue;
     padding: 20px;
+    box-sizing: border-box;
 }
 
 .text {
@@ -29,6 +30,7 @@ body {
 
 @media (max-width: 1000px){
     .container{
+        width: 100%;
         flex-direction: column;
     }
     #canvas {
