@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Max Kerscher-Santelli - Web GL Portfolio</title>
+        <link rel='stylesheet' href='style.css'>
+        <script src="scripts/main.js"></script>
+
+        <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
+        <script src="https://webglfundamentals.org/webgl/resources/m4.js"></script>
+        
+        <script  id="3d-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 a_position;
+            attribute vec4 a_color;
+
+            uniform mat4 u_matrix;
+
+            varying vec4 v_color;
+
+            void main() {
+              // Multiply the position by the matrix.
+              gl_Position = u_matrix * a_position;
+
+              // Pass the color to the fragment shader.
+              v_color = a_color;
+            }
+        </script>
+        <!-- fragment shader -->
+        <script  id="3d-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            // Passed in from the vertex shader.
+            varying vec4 v_color;
+
+            void main() {
+               gl_FragColor = v_color;
+            }
+        </script>
+    </head>
+    <body onload="main()">
+        <canvas id="canvas"></canvas>
+    </body>
+
+</html>
