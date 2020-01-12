@@ -12,18 +12,16 @@
 
         <script  id="3d-vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_position;
-            attribute vec4 a_color;
+            attribute vec2 a_texcoord;
 
             uniform mat4 u_matrix;
 
-            varying vec4 v_color;
+            varying vec2 v_texcoord;
 
             void main() {
-              // Multiply the position by the matrix.
               gl_Position = u_matrix * a_position;
 
-              // Pass the color to the fragment shader.
-              v_color = a_color;
+              v_texcoord = a_texcoord;
             }
         </script>
         <!-- fragment shader -->
@@ -31,10 +29,13 @@
             precision mediump float;
 
             // Passed in from the vertex shader.
-            varying vec4 v_color;
+            varying vec2 v_texcoord;
+
+            // The texture.
+            uniform sampler2D u_texture;
 
             void main() {
-               gl_FragColor = v_color;
+                gl_FragColor = texture2D(u_texture, v_texcoord);
             }
         </script>
     </head>
@@ -43,7 +44,7 @@
             <div class="text-section">
                 <h1>WebGL Game Engine</h1>
                 <h4>By Max Kerscher-Santelli</h4>
-                <div class="text">This is a from scratch 3D graphics renderer I have been working on in my spare time. I chose this project to learn more about the GPU and how developers can tke advantage of it. To get close to the GPU I have chosen to work with just WebGL. WebGL is the API your browser uses to comunicate with the GPU. Thanks for checking it out.</div>
+                <div class="text">This is a from scratch 3D graphics renderer I have been working on in my spare time. I chose this project to learn more about the GPU and how developers can take advantage of it. To get close to the GPU I have chosen to work with just WebGL. WebGL is the API your browser uses to comunicate with the GPU. Thanks for checking it out.</div>
                 <div class="text">You can view the source code at <a href="https://github.com/maxkerschersantelli/maxkerschersantelli.github.io">this Github Repo</a>. Most of the work you can find under scripts/main.js. My shaders are in index.html.</div>
                 <div class="feature-section">
                     <div>
