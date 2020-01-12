@@ -1,5 +1,5 @@
 body {
-  margin: 0;
+    margin: 0;
 }
 
 .container{
@@ -24,4 +24,19 @@ body {
 .feature-section{
     display:flex;
     justify-content: space-around;
+}
+
+
+@media (max-width: 1000px){
+    .container{
+        flex-direction: column;
+    }
+    #canvas {
+        width: 100%;
+    }
+
+    .text-section {
+        width: 100%;
+    }
+
 }
