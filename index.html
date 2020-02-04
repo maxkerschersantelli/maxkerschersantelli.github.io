@@ -6,6 +6,8 @@
         <link rel='stylesheet' href='style.css'>
         <script src="scripts/main.js"></script>
         <script src="scripts/geometry.js"></script>
+                <script src="test.js"></script>
+
 
         <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
         <script src="https://webglfundamentals.org/webgl/resources/m4.js"></script>
@@ -39,13 +41,14 @@
             }
         </script>
     </head>
-    <body onload="main()">
+    <body onload="problem()">
         <div class="container">
             <div class="text-section">
-                <h1>WebGL Game Engine</h1>
+                <h1>WebGL 3D Graphics Renderer</h1>
                 <h4>By Max Kerscher-Santelli</h4>
-                <div class="text">This is a from scratch 3D graphics renderer I have been working on in my spare time. I chose this project to learn more about the GPU and how developers can take advantage of it. To get close to the GPU I have chosen to work with just WebGL. WebGL is the API your browser uses to comunicate with the GPU. Thanks for checking it out.</div>
-                <div class="text">You can view the source code at <a href="https://github.com/maxkerschersantelli/maxkerschersantelli.github.io">this Github Repo</a>. Most of the work you can find under scripts/main.js. My shaders are in index.html.</div>
+                <div class="text">I built this 3D graphics renderer from the ground up. The reason I chose to explore this project was to learn more about the intricacies of GPU and master new skills. As a developer I like to challenge myself and explore new technologies, so I chose to avoid frameworks that wrote the WebGL code for me to master the complexities of graphics technology.</div>
+                <div class="text">Not familiar with WebGL? WebGL is the API your browser uses to communicate with the GPU, which renders images. The demo you see to your right is constructing 3D shapes from 3D coordinates, wrapping them in textures, applying perspective and applying animation by calculating the position and rotation of the shape with respect to the user. This information is then sent to the GPU and is displayed in your browser.</div>
+                <div class="text">If you’d like to view the source code you can go to <a href="https://github.com/maxkerschersantelli/maxkerschersantelli.github.io">this Github Repo</a>. You can find most of my code in the file scripts/main.js. You can also find my shader by in index.html.</div>
                 <div class="feature-section">
                     <div>
                         <div>Current Features:</div>

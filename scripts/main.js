@@ -47,7 +47,16 @@ function main() {
         // Now that the image has loaded make copy it to the texture.
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, image);
-        gl.generateMipmap(gl.TEXTURE_2D);
+        if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+            // Yes, it's a power of 2. Generate mips.
+            gl.generateMipmap(gl.TEXTURE_2D);
+        } else {
+            // No, it's not a power of 2. Turn off mips and set wrapping to clamp to edge
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        }
+
     });
 
     function radToDeg(r) {
@@ -113,10 +122,10 @@ function main() {
         gl.vertexAttribPointer(
             positionLocation, size, type, normalize, stride, offset);
 
-        // Turn on the color attribute
+        // Turn on the texture attribute
         gl.enableVertexAttribArray(texcoordLocation);
 
-        // Bind the color buffer.
+        // Bind the texture buffer.
         gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
 
         // Tell the attribute how to get data out of colorBuffer (ARRAY_BUFFER)
@@ -150,6 +159,7 @@ function main() {
         requestAnimationFrame(drawScene);
     }
 }
+
 
 // Fill the buffer with the values that define a letter 'F'.
 function setGeometry(gl, geometry) {
@@ -299,132 +309,132 @@ function setTexcoords(gl) {
         gl.ARRAY_BUFFER,
         new Float32Array([
             // left column front
-         38 / 255,  44 / 255,
-         38 / 255, 223 / 255,
-        113 / 255,  44 / 255,
-         38 / 255, 223 / 255,
-        113 / 255, 223 / 255,
-        113 / 255,  44 / 255,
+            38 / 255,  44 / 255,
+            38 / 255, 223 / 255,
+            113 / 255,  44 / 255,
+            38 / 255, 223 / 255,
+            113 / 255, 223 / 255,
+            113 / 255,  44 / 255,
 
-        // top rung front
-        113 / 255, 44 / 255,
-        113 / 255, 85 / 255,
-        218 / 255, 44 / 255,
-        113 / 255, 85 / 255,
-        218 / 255, 85 / 255,
-        218 / 255, 44 / 255,
+            // top rung front
+            113 / 255, 44 / 255,
+            113 / 255, 85 / 255,
+            218 / 255, 44 / 255,
+            113 / 255, 85 / 255,
+            218 / 255, 85 / 255,
+            218 / 255, 44 / 255,
 
-        // middle rung front
-        113 / 255, 112 / 255,
-        113 / 255, 151 / 255,
-        203 / 255, 112 / 255,
-        113 / 255, 151 / 255,
-        203 / 255, 151 / 255,
-        203 / 255, 112 / 255,
+            // middle rung front
+            113 / 255, 112 / 255,
+            113 / 255, 151 / 255,
+            203 / 255, 112 / 255,
+            113 / 255, 151 / 255,
+            203 / 255, 151 / 255,
+            203 / 255, 112 / 255,
 
-        // left column back
-         38 / 255,  44 / 255,
-        113 / 255,  44 / 255,
-         38 / 255, 223 / 255,
-         38 / 255, 223 / 255,
-        113 / 255,  44 / 255,
-        113 / 255, 223 / 255,
+            // left column back
+            38 / 255,  44 / 255,
+            113 / 255,  44 / 255,
+            38 / 255, 223 / 255,
+            38 / 255, 223 / 255,
+            113 / 255,  44 / 255,
+            113 / 255, 223 / 255,
 
-        // top rung back
-        113 / 255, 44 / 255,
-        218 / 255, 44 / 255,
-        113 / 255, 85 / 255,
-        113 / 255, 85 / 255,
-        218 / 255, 44 / 255,
-        218 / 255, 85 / 255,
+            // top rung back
+            113 / 255, 44 / 255,
+            218 / 255, 44 / 255,
+            113 / 255, 85 / 255,
+            113 / 255, 85 / 255,
+            218 / 255, 44 / 255,
+            218 / 255, 85 / 255,
 
-        // middle rung back
-        113 / 255, 112 / 255,
-        203 / 255, 112 / 255,
-        113 / 255, 151 / 255,
-        113 / 255, 151 / 255,
-        203 / 255, 112 / 255,
-        203 / 255, 151 / 255,
+            // middle rung back
+            113 / 255, 112 / 255,
+            203 / 255, 112 / 255,
+            113 / 255, 151 / 255,
+            113 / 255, 151 / 255,
+            203 / 255, 112 / 255,
+            203 / 255, 151 / 255,
 
-        // top
-        0, 0,
-        1, 0,
-        1, 1,
-        0, 0,
-        1, 1,
-        0, 1,
+            // top
+            0, 0,
+            1, 0,
+            1, 1,
+            0, 0,
+            1, 1,
+            0, 1,
 
-        // top rung right
-        0, 0,
-        1, 0,
-        1, 1,
-        0, 0,
-        1, 1,
-        0, 1,
+            // top rung right
+            0, 0,
+            1, 0,
+            1, 1,
+            0, 0,
+            1, 1,
+            0, 1,
 
-        // under top rung
-        0, 0,
-        0, 1,
-        1, 1,
-        0, 0,
-        1, 1,
-        1, 0,
+            // under top rung
+            0, 0,
+            0, 1,
+            1, 1,
+            0, 0,
+            1, 1,
+            1, 0,
 
-        // between top rung and middle
-        0, 0,
-        1, 1,
-        0, 1,
-        0, 0,
-        1, 0,
-        1, 1,
+            // between top rung and middle
+            0, 0,
+            1, 1,
+            0, 1,
+            0, 0,
+            1, 0,
+            1, 1,
 
-        // top of middle rung
-        0, 0,
-        1, 1,
-        0, 1,
-        0, 0,
-        1, 0,
-        1, 1,
+            // top of middle rung
+            0, 0,
+            1, 1,
+            0, 1,
+            0, 0,
+            1, 0,
+            1, 1,
 
-        // right of middle rung
-        0, 0,
-        1, 1,
-        0, 1,
-        0, 0,
-        1, 0,
-        1, 1,
+            // right of middle rung
+            0, 0,
+            1, 1,
+            0, 1,
+            0, 0,
+            1, 0,
+            1, 1,
 
-        // bottom of middle rung.
-        0, 0,
-        0, 1,
-        1, 1,
-        0, 0,
-        1, 1,
-        1, 0,
+            // bottom of middle rung.
+            0, 0,
+            0, 1,
+            1, 1,
+            0, 0,
+            1, 1,
+            1, 0,
 
-        // right of bottom
-        0, 0,
-        1, 1,
-        0, 1,
-        0, 0,
-        1, 0,
-        1, 1,
+            // right of bottom
+            0, 0,
+            1, 1,
+            0, 1,
+            0, 0,
+            1, 0,
+            1, 1,
 
-        // bottom
-        0, 0,
-        0, 1,
-        1, 1,
-        0, 0,
-        1, 1,
-        1, 0,
+            // bottom
+            0, 0,
+            0, 1,
+            1, 1,
+            0, 0,
+            1, 1,
+            1, 0,
 
-        // left side
-        0, 0,
-        0, 1,
-        1, 1,
-        0, 0,
-        1, 1,
-        1, 0,
-      ]),
-      gl.STATIC_DRAW);
+            // left side
+            0, 0,
+            0, 1,
+            1, 1,
+            0, 0,
+            1, 1,
+            1, 0,
+        ]),
+        gl.STATIC_DRAW);
 }
