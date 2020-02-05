@@ -9,6 +9,7 @@ body {
 #canvas {
     width: 50%;
     height: 100vh;
+    box-shadow: -4px 0px 10px #000000
 }
 
 .text-section {
