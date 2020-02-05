@@ -59,6 +59,10 @@ function main() {
 
     });
 
+    function isPowerOf2(value) {
+        return (value & (value - 1)) === 0;
+    }
+
     function radToDeg(r) {
         return r * 180 / Math.PI;
     }
