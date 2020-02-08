@@ -55,7 +55,7 @@ function main() {
     // Let's make all the nodes
     var solarSystemNode = new Node();
     var earthOrbitNode = new Node();
-    earthOrbitNode.localMatrix = m4.translation(100, 0, 0);  // earth orbit 100 units from the sun
+    earthOrbitNode.localMatrix = m4.translation(175, 0, 0);  // earth orbit 100 units from the sun
     var moonOrbitNode = new Node();
     moonOrbitNode.localMatrix = m4.translation(30, 0, 0);  // moon 30 units from the earth
 
@@ -116,7 +116,7 @@ function main() {
 
     // Draw the scene.
     function drawScene(time) {
-        time *= 0.0001;
+        time *= 0.0005;
 
         webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 
@@ -136,7 +136,7 @@ function main() {
             m4.perspective(fieldOfViewRadians, aspect, 1, 2000);
 
         // Compute the camera's matrix using look at.
-        var cameraPosition = [0, -300, 500];
+        var cameraPosition = [0, -300, 700];
         var target = [0, 0, 0];
         var up = [0, 0, 1];
         var cameraMatrix = m4.lookAt(cameraPosition, target, up);

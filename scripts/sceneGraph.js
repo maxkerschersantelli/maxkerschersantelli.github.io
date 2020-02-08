@@ -24,7 +24,7 @@ Node.prototype.updateWorldMatrix = function(parentWorldMatrix) {
     if (parentWorldMatrix) {
         // a matrix was passed in so do the math and
         // store the result in `this.worldMatrix`.
-        m4.multiply(this.localMatrix, parentWorldMatrix, this.worldMatrix);
+        m4.multiply(parentWorldMatrix, this.localMatrix, this.worldMatrix);
     } else {
         // no matrix was passed in so just copy localMatrix to worldMatrix
         m4.copy(this.localMatrix, this.worldMatrix);
