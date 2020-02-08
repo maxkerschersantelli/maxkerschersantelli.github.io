@@ -9,7 +9,6 @@ function main() {
         return;
     }
     
-    
     //var buffers = setGeometry(gl, getFShape());
 
     var buffers = window.primitives.createSphereBuffers(gl, 10, 48, 24);

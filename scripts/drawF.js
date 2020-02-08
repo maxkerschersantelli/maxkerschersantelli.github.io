@@ -10,7 +10,7 @@ function drawF() {
     }
 
     // setup GLSL program
-    var program = webglUtils.createProgramFromScripts(gl, ["3d-vertex-shader", "3d-fragment-shader"]);
+    var program = webglUtils.createProgramFromScripts(gl, ["texture-3d-vertex-shader", "texture-3d-fragment-shader"]);
 
     // look up where the vertex data needs to go.
     var positionLocation = gl.getAttribLocation(program, "a_position");

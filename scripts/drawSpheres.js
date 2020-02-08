@@ -12,7 +12,7 @@ function drawSpheres() {
     var buffers = window.primitives.createSphereBuffers(gl, 10, 48, 24);
 
     // setup GLSL program
-    var program = webglUtils.createProgramFromScripts(gl, ["3d-vertex-shader", "3d-fragment-shader"]);
+    var program = webglUtils.createProgramFromScripts(gl, ["boiler-plate-3d-vertex-shader", "boiler-plate-3d-fragment-shader"]);
     var uniformSetters = webglUtils.createUniformSetters(gl, program);
     var attribSetters  = webglUtils.createAttributeSetters(gl, program);
 
