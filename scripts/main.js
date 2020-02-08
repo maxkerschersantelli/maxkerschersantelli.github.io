@@ -8,94 +8,127 @@ function main() {
     if (!gl) {
         return;
     }
-    
-    //var buffers = setGeometry(gl, getFShape());
 
-    var buffers = window.primitives.createSphereBuffers(gl, 10, 48, 24);
+    var createFlattenedVertices = function(gl, vertices) {
+        var last;
+        return webglUtils.createBufferInfoFromArrays(
+            gl,
+            primitives.makeRandomVertexColors(
+                primitives.deindexVertices(vertices),
+                {
+                    vertsPerColor: 1,
+                    rand: function(ndx, channel) {
+                        if (channel === 0) {
+                            last = 128 + Math.random() * 128 | 0;
+                        }
+                        return channel < 3 ? last : 255;
+                    }
+                })
+        );
+    };
+
+    var sphereBufferInfo = createFlattenedVertices(gl, primitives.createSphereVertices(10, 12, 6));
 
     // setup GLSL program
-    var program = webglUtils.createProgramFromScripts(gl, ["3d-vertex-shader", "3d-fragment-shader"]);
-    var uniformSetters = webglUtils.createUniformSetters(gl, program);
-    var attribSetters  = webglUtils.createAttributeSetters(gl, program);
-
-    var attribs = {
-        a_position: { buffer: buffers.position, numComponents: 3, },
-        a_normal:   { buffer: buffers.normal,   numComponents: 3, },
-        a_texcoord: { buffer: buffers.texcoord, numComponents: 2, },
-    };
+    var programInfo = webglUtils.createProgramInfo(gl, ["simple-3d-vertex-shader", "simple-3d-fragment-shader"]);
 
     function degToRad(d) {
         return d * Math.PI / 180;
     }
 
+    function rand(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    function emod(x, n) {
+        return x >= 0 ? (x % n) : ((n - (-x % n)) % n);
+    }
+
+
     var cameraAngleRadians = degToRad(0);
     var fieldOfViewRadians = degToRad(60);
     var cameraHeight = 50;
 
-    var uniformsThatAreTheSameForAllObjects = {
-        u_lightWorldPos:         [-50, 30, 100],
-        u_viewInverse:           m4.identity(),
-        u_lightColor:            [1, 1, 1, 1],
+    var objectsToDraw = [];
+    var objects = [];
+
+    // Let's make all the nodes
+    var solarSystemNode = new Node();
+    var earthOrbitNode = new Node();
+    earthOrbitNode.localMatrix = m4.translation(100, 0, 0);  // earth orbit 100 units from the sun
+    var moonOrbitNode = new Node();
+    moonOrbitNode.localMatrix = m4.translation(30, 0, 0);  // moon 30 units from the earth
+
+    var sunNode = new Node();
+    sunNode.localMatrix = m4.scaling(5, 5, 5);  // sun a the center
+    sunNode.drawInfo = {
+        uniforms: {
+            u_colorOffset: [0.6, 0.6, 0, 1], // yellow
+            u_colorMult:   [0.4, 0.4, 0, 1],
+        },
+        programInfo: programInfo,
+        bufferInfo: sphereBufferInfo,
     };
 
-    var uniformsThatAreComputedForEachObject = {
-        u_worldViewProjection:   m4.identity(),
-        u_world:                 m4.identity(),
-        u_worldInverseTranspose: m4.identity(),
+    var earthNode = new Node();
+    earthNode.localMatrix = m4.scaling(2, 2, 2);   // make the earth twice as large
+    earthNode.drawInfo = {
+        uniforms: {
+            u_colorOffset: [0.2, 0.5, 0.8, 1],  // blue-green
+            u_colorMult:   [0.8, 0.5, 0.2, 1],
+        },
+        programInfo: programInfo,
+        bufferInfo: sphereBufferInfo,
     };
 
-    var rand = function(min, max) {
-        if (max === undefined) {
-            max = min;
-            min = 0;
-        }
-        return min + Math.random() * (max - min);
+    var moonNode = new Node();
+    moonNode.localMatrix = m4.scaling(0.4, 0.4, 0.4);
+    moonNode.drawInfo = {
+        uniforms: {
+            u_colorOffset: [0.6, 0.6, 0.6, 1],  // gray
+            u_colorMult:   [0.1, 0.1, 0.1, 1],
+        },
+        programInfo: programInfo,
+        bufferInfo: sphereBufferInfo,
     };
 
-    var randInt = function(range) {
-        return Math.floor(Math.random() * range);
-    };
 
-    var textures = [
-        textureUtils.makeStripeTexture(gl, { color1: "#FFF", color2: "#CCC", }),
-        textureUtils.makeCheckerTexture(gl, { color1: "#FFF", color2: "#CCC", }),
-        textureUtils.makeCircleTexture(gl, { color1: "#FFF", color2: "#CCC", }),
+    // connect the celetial objects
+    sunNode.setParent(solarSystemNode);
+    earthOrbitNode.setParent(solarSystemNode);
+    earthNode.setParent(earthOrbitNode);
+    moonOrbitNode.setParent(earthOrbitNode);
+    moonNode.setParent(moonOrbitNode);
+
+    var objects = [
+        sunNode,
+        earthNode,
+        moonNode,
     ];
 
-    var objects = [];
-    var numObjects = 300;
-    var baseColor = rand(240);
-    for (var ii = 0; ii < numObjects; ++ii) {
-        objects.push({
-            radius: rand(150),
-            xRotation: rand(Math.PI * 2),
-            yRotation: rand(Math.PI),
-            materialUniforms: {
-                u_colorMult:             chroma.hsv(rand(baseColor, baseColor + 120), 0.5, 1).gl(),
-                u_diffuse:               textures[randInt(textures.length)],
-                u_specular:              [1, 1, 1, 1],
-                u_shininess:             rand(500),
-                u_specularFactor:        rand(1),
-            },
-        });
-    }
+    var objectsToDraw = [
+        sunNode.drawInfo,
+        earthNode.drawInfo,
+        moonNode.drawInfo,
+    ];
 
     requestAnimationFrame(drawScene);
 
     // Draw the scene.
     function drawScene(time) {
-        time = time * 0.0001 + 5;
+        time *= 0.0001;
 
         webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 
         // Tell WebGL how to convert from clip space to pixels
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-        // Clear the canvas AND the depth buffer.
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
         gl.enable(gl.CULL_FACE);
         gl.enable(gl.DEPTH_TEST);
+
+        // Clear the canvas AND the depth buffer.
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         // Compute the projection matrix
         var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
@@ -103,329 +136,66 @@ function main() {
             m4.perspective(fieldOfViewRadians, aspect, 1, 2000);
 
         // Compute the camera's matrix using look at.
-        var cameraPosition = [0, 0, 100];
+        var cameraPosition = [0, -300, 500];
         var target = [0, 0, 0];
-        var up = [0, 1, 0];
-        var cameraMatrix = m4.lookAt(cameraPosition, target, up, uniformsThatAreTheSameForAllObjects.u_viewInverse);
+        var up = [0, 0, 1];
+        var cameraMatrix = m4.lookAt(cameraPosition, target, up);
 
         // Make a view matrix from the camera matrix.
         var viewMatrix = m4.inverse(cameraMatrix);
 
         var viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
 
-        gl.useProgram(program);
+        // update the local matrices for each object.
+        m4.multiply(m4.yRotation(0.01), earthOrbitNode.localMatrix, earthOrbitNode.localMatrix);
+        m4.multiply(m4.yRotation(0.01), moonOrbitNode.localMatrix, moonOrbitNode.localMatrix);
+        // spin the earth
+        m4.multiply(m4.yRotation(0.05), earthNode.localMatrix, earthNode.localMatrix);
+        // spin the moon
+        m4.multiply(m4.yRotation(-0.01), moonNode.localMatrix, moonNode.localMatrix);
 
-        // Setup all the needed attributes.
-        webglUtils.setAttributes(attribSetters, attribs);
+        // Update all world matrices in the scene graph
+        solarSystemNode.updateWorldMatrix();
 
-        // Bind the indices.
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
-
-        // Set the uniforms that are the same for all objects.
-        webglUtils.setUniforms(uniformSetters, uniformsThatAreTheSameForAllObjects);
-
-        // Draw objects
+        // Compute all the matrices for rendering
         objects.forEach(function(object) {
+            object.drawInfo.uniforms.u_matrix = m4.multiply(viewProjectionMatrix, object.worldMatrix);
+        });
 
-            // Compute a position for this object based on the time.
-            var worldMatrix = m4.xRotation(object.xRotation * time);
-            worldMatrix = m4.yRotate(worldMatrix, object.yRotation * time);
-            worldMatrix = m4.translate(worldMatrix, 0, 0, object.radius);
-            uniformsThatAreComputedForEachObject.u_world = worldMatrix;
+        // ------ Draw the objects --------
 
-            // Multiply the matrices.
-            m4.multiply(viewProjectionMatrix, worldMatrix, uniformsThatAreComputedForEachObject.u_worldViewProjection);
-            m4.transpose(m4.inverse(worldMatrix), uniformsThatAreComputedForEachObject.u_worldInverseTranspose);
+        var lastUsedProgramInfo = null;
+        var lastUsedBufferInfo = null;
 
-            // Set the uniforms we just computed
-            webglUtils.setUniforms(uniformSetters, uniformsThatAreComputedForEachObject);
+        objectsToDraw.forEach(function(object) {
+            var programInfo = object.programInfo;
+            var bufferInfo = object.bufferInfo;
+            var bindBuffers = false;
 
-            // Set the uniforms that are specific to the this object.
-            webglUtils.setUniforms(uniformSetters, object.materialUniforms);
+            if (programInfo !== lastUsedProgramInfo) {
+                lastUsedProgramInfo = programInfo;
+                gl.useProgram(programInfo.program);
 
-            // Draw the geometry.
-            gl.drawElements(gl.TRIANGLES, buffers.numElements, gl.UNSIGNED_SHORT, 0);
+                // We have to rebind buffers when changing programs because we
+                // only bind buffers the program uses. So if 2 programs use the same
+                // bufferInfo but the 1st one uses only positions the when the
+                // we switch to the 2nd one some of the attributes will not be on.
+                bindBuffers = true;
+            }
+
+            // Setup all the needed attributes.
+            if (bindBuffers || bufferInfo !== lastUsedBufferInfo) {
+                lastUsedBufferInfo = bufferInfo;
+                webglUtils.setBuffersAndAttributes(gl, programInfo, bufferInfo);
+            }
+
+            // Set the uniforms.
+            webglUtils.setUniforms(programInfo, object.uniforms);
+
+            // Draw
+            gl.drawArrays(gl.TRIANGLES, 0, bufferInfo.numElements);
         });
 
         requestAnimationFrame(drawScene);
     }
-}
-
-
-// Fill the buffer with the values that define a letter 'F'.
-function setGeometry(gl, geometry) {
-    gl.bufferData(
-        gl.ARRAY_BUFFER,
-        geometry,
-        gl.STATIC_DRAW);
-}
-
-// Fill the buffer with colors for the 'F'.
-function setColors(gl) {
-    gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Uint8Array([
-            // left column front
-            200,  70, 120,
-            200,  70, 120,
-            200,  70, 120,
-            200,  70, 120,
-            200,  70, 120,
-            200,  70, 120,
-
-            // top rung front
-            200,  70, 120,
-            200,  70, 120,
-            200,  70, 120,
-            200,  70, 120,
-            200,  70, 120,
-            200,  70, 120,
-
-            // middle rung front
-            200,  70, 120,
-            200,  70, 120,
-            200,  70, 120,
-            200,  70, 120,
-            200,  70, 120,
-            200,  70, 120,
-
-            // left column back
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-
-            // top rung back
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-
-            // middle rung back
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-
-            // top
-            70, 200, 210,
-            70, 200, 210,
-            70, 200, 210,
-            70, 200, 210,
-            70, 200, 210,
-            70, 200, 210,
-
-            // top rung right
-            200, 200, 70,
-            200, 200, 70,
-            200, 200, 70,
-            200, 200, 70,
-            200, 200, 70,
-            200, 200, 70,
-
-            // under top rung
-            210, 100, 70,
-            210, 100, 70,
-            210, 100, 70,
-            210, 100, 70,
-            210, 100, 70,
-            210, 100, 70,
-
-            // between top rung and middle
-            210, 160, 70,
-            210, 160, 70,
-            210, 160, 70,
-            210, 160, 70,
-            210, 160, 70,
-            210, 160, 70,
-
-            // top of middle rung
-            70, 180, 210,
-            70, 180, 210,
-            70, 180, 210,
-            70, 180, 210,
-            70, 180, 210,
-            70, 180, 210,
-
-            // right of middle rung
-            100, 70, 210,
-            100, 70, 210,
-            100, 70, 210,
-            100, 70, 210,
-            100, 70, 210,
-            100, 70, 210,
-
-            // bottom of middle rung.
-            76, 210, 100,
-            76, 210, 100,
-            76, 210, 100,
-            76, 210, 100,
-            76, 210, 100,
-            76, 210, 100,
-
-            // right of bottom
-            140, 210, 80,
-            140, 210, 80,
-            140, 210, 80,
-            140, 210, 80,
-            140, 210, 80,
-            140, 210, 80,
-
-            // bottom
-            90, 130, 110,
-            90, 130, 110,
-            90, 130, 110,
-            90, 130, 110,
-            90, 130, 110,
-            90, 130, 110,
-
-            // left side
-            160, 160, 220,
-            160, 160, 220,
-            160, 160, 220,
-            160, 160, 220,
-            160, 160, 220,
-            160, 160, 220]),
-        gl.STATIC_DRAW);
-}
-
-function setTexcoords(gl) {
-    gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Float32Array([
-            // left column front
-            38 / 255,  44 / 255,
-            38 / 255, 223 / 255,
-            113 / 255,  44 / 255,
-            38 / 255, 223 / 255,
-            113 / 255, 223 / 255,
-            113 / 255,  44 / 255,
-
-            // top rung front
-            113 / 255, 44 / 255,
-            113 / 255, 85 / 255,
-            218 / 255, 44 / 255,
-            113 / 255, 85 / 255,
-            218 / 255, 85 / 255,
-            218 / 255, 44 / 255,
-
-            // middle rung front
-            113 / 255, 112 / 255,
-            113 / 255, 151 / 255,
-            203 / 255, 112 / 255,
-            113 / 255, 151 / 255,
-            203 / 255, 151 / 255,
-            203 / 255, 112 / 255,
-
-            // left column back
-            38 / 255,  44 / 255,
-            113 / 255,  44 / 255,
-            38 / 255, 223 / 255,
-            38 / 255, 223 / 255,
-            113 / 255,  44 / 255,
-            113 / 255, 223 / 255,
-
-            // top rung back
-            113 / 255, 44 / 255,
-            218 / 255, 44 / 255,
-            113 / 255, 85 / 255,
-            113 / 255, 85 / 255,
-            218 / 255, 44 / 255,
-            218 / 255, 85 / 255,
-
-            // middle rung back
-            113 / 255, 112 / 255,
-            203 / 255, 112 / 255,
-            113 / 255, 151 / 255,
-            113 / 255, 151 / 255,
-            203 / 255, 112 / 255,
-            203 / 255, 151 / 255,
-
-            // top
-            0, 0,
-            1, 0,
-            1, 1,
-            0, 0,
-            1, 1,
-            0, 1,
-
-            // top rung right
-            0, 0,
-            1, 0,
-            1, 1,
-            0, 0,
-            1, 1,
-            0, 1,
-
-            // under top rung
-            0, 0,
-            0, 1,
-            1, 1,
-            0, 0,
-            1, 1,
-            1, 0,
-
-            // between top rung and middle
-            0, 0,
-            1, 1,
-            0, 1,
-            0, 0,
-            1, 0,
-            1, 1,
-
-            // top of middle rung
-            0, 0,
-            1, 1,
-            0, 1,
-            0, 0,
-            1, 0,
-            1, 1,
-
-            // right of middle rung
-            0, 0,
-            1, 1,
-            0, 1,
-            0, 0,
-            1, 0,
-            1, 1,
-
-            // bottom of middle rung.
-            0, 0,
-            0, 1,
-            1, 1,
-            0, 0,
-            1, 1,
-            1, 0,
-
-            // right of bottom
-            0, 0,
-            1, 1,
-            0, 1,
-            0, 0,
-            1, 0,
-            1, 1,
-
-            // bottom
-            0, 0,
-            0, 1,
-            1, 1,
-            0, 0,
-            1, 1,
-            1, 0,
-
-            // left side
-            0, 0,
-            0, 1,
-            1, 1,
-            0, 0,
-            1, 1,
-            1, 0,
-        ]),
-        gl.STATIC_DRAW);
 }

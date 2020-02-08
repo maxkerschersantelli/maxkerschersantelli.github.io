@@ -8,6 +8,7 @@
         <script src="scripts/drawF.js"></script>
         <script src="scripts/drawSpheres.js"></script>
         <script src="scripts/geometry.js"></script>
+        <script src="scripts/sceneGraph.js"></script>
 
         <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
         <script src="https://webglfundamentals.org/webgl/resources/m4.js"></script>
@@ -107,8 +108,38 @@
                 gl_FragColor = texture2D(u_texture, v_texcoord);
             }
         </script>
+        <script  id="simple-3d-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 a_position;
+            attribute vec4 a_color;
+
+            uniform mat4 u_matrix;
+
+            varying vec4 v_color;
+
+            void main() {
+                // Multiply the position by the matrix.
+                gl_Position = u_matrix * a_position;
+
+                // Pass the color to the fragment shader.
+                v_color = a_color;
+            }
+        </script>
+        <!-- fragment shader -->
+        <script  id="simple-3d-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            // Passed in from the vertex shader.
+            varying vec4 v_color;
+
+            uniform vec4 u_colorMult;
+            uniform vec4 u_colorOffset;
+
+            void main() {
+                gl_FragColor = v_color * u_colorMult + u_colorOffset;
+            }
+        </script>
     </head>
-    <body onload="drawSpheres()">
+    <body onload="main()">
         <div class="container">
             <div class="text-section">
                 <h1>WebGL 3D Graphics Renderer</h1>
