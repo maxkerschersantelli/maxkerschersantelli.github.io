@@ -9,6 +9,7 @@
         <script src="scripts/drawSpheres.js"></script>
         <script src="scripts/geometry.js"></script>
         <script src="scripts/sceneGraph.js"></script>
+        <script src="scripts/solarSystem.js"></script>
 
         <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
         <script src="https://webglfundamentals.org/webgl/resources/m4.js"></script>
@@ -138,8 +139,28 @@
                 gl_FragColor = v_color * u_colorMult + u_colorOffset;
             }
         </script>
+        <script  id="skybox-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 a_position;
+            varying vec4 v_position;
+            void main() {
+                v_position = a_position;
+                gl_Position = vec4(a_position.xy, 1, 1);
+            }
+        </script>
+        <script  id="skybox-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            uniform samplerCube u_skybox;
+            uniform mat4 u_viewDirectionProjectionInverse;
+
+            varying vec4 v_position;
+            void main() {
+                vec4 t = u_viewDirectionProjectionInverse * v_position;
+                gl_FragColor = textureCube(u_skybox, normalize(t.xyz / t.w));
+            }
+        </script>
     </head>
-    <body onload="main()">
+    <body onload="solarSystem()">
         <div class="container">
             <div class="text-section">
                 <h1>WebGL 3D Graphics Renderer</h1>
