@@ -50,11 +50,11 @@ function solarSystem() {
     const faceInfos = [
         {
             target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-            url: '../images/skybox/Front_Tex.png',
+            url: '../images/skybox/Left_Tex.png',
         },
         {
             target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-            url: '../images/skybox/Back_Tex.png',
+            url: '../images/skybox/Right_Tex.png',
         },
         {
             target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
@@ -66,13 +66,13 @@ function solarSystem() {
         },
         {
             target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-            url: '../images/skybox/Right_Tex.png',
+            url: '../images/skybox/Front_Tex.png',
         },
         {
             target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-            url: '../images/skybox/Left_Tex.png',
+            url: '../images/skybox/Back_Tex.png',
         },
-    ];
+    ];  
 
     faceInfos.forEach((faceInfo) => {
         const {target, url} = faceInfo;
@@ -242,13 +242,14 @@ function solarSystem() {
         var cameraPosition;
         if(outsideCam){
         //cameraPosition = [0, Math.cos(time * .1), 0, Math.sin(time * .1)];
-           cameraPosition = [0, -300, 700];
+            cameraPosition = [Math.cos(time * .1) * 700, 0, Math.cos(time * .1) * 700];
+           //cameraPosition = [0, -300, 700];
         }else{
             cameraPosition = cameraNode.worldMatrix;
         }
          
         var target = [0, 0, 0];
-        var up = [0, 0, 1];
+        var up = [0, 1, 0];
         var cameraMatrix = m4.lookAt(cameraPosition, target, up);
 
         // Make a view matrix from the camera matrix.
