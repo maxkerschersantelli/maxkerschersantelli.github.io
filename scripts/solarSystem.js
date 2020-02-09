@@ -128,13 +128,13 @@ function solarSystem() {
     var moonOrbitNode = new Node();
     moonOrbitNode.localMatrix = m4.translation(30, 0, 0);  // moon 30 units from the earth
     var cameraNode = new Node();
-    cameraNode.localMatrix = m4.translation(200, 50, 300);
+    cameraNode.localMatrix = m4.translation(250, 50, 300);
     
     var cameraNodeVisual = new Node();
-    cameraNodeVisual.localMatrix = m4.scaling(3, 3, 3);   // make the earth twice as large
+    cameraNodeVisual.localMatrix = m4.scaling(4, 4, 4);   // make the earth twice as large
     cameraNodeVisual.drawInfo = {
         uniforms: {
-            u_colorOffset: [0.6, 0.6, 0, 1],  // blue-green
+            u_colorOffset: [0.9, 0.2, 0, 1],  // blue-green
             u_colorMult:   [0.8, 0.5, 0.2, 1],
         },
         programInfo: programInfo,
@@ -242,7 +242,7 @@ function solarSystem() {
         var cameraPosition;
         if(outsideCam){
         //cameraPosition = [0, Math.cos(time * .1), 0, Math.sin(time * .1)];
-            cameraPosition = [Math.cos(time * .1) * 700, 0, Math.cos(time * .1) * 700];
+            cameraPosition = [Math.cos(time * .1) * 700, 100, Math.sin(time * .1) * 700];
            //cameraPosition = [0, -300, 700];
         }else{
             cameraPosition = cameraNode.worldMatrix;
