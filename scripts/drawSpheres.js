@@ -63,7 +63,6 @@ function drawSpheres() {
     var objects = [];
     var numObjects = 300;
     var baseColor = rand(240);
-    console.log(chroma.hsv(rand(baseColor, baseColor + 120), 0.5, 1).gl());
     for (var ii = 0; ii < numObjects; ++ii) {
         objects.push({
             radius: rand(150),
