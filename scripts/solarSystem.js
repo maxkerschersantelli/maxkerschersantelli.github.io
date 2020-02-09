@@ -58,19 +58,19 @@ function solarSystem() {
         },
         {
             target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-            url: '../images/skybox/Left_Tex.png',
+            url: '../images/skybox/Up_Tex.png',
         },
         {
             target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-            url: '../images/skybox/Right_Tex.png',
-        },
-        {
-            target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
             url: '../images/skybox/Down_Tex.png',
         },
         {
+            target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+            url: '../images/skybox/Right_Tex.png',
+        },
+        {
             target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-            url: '../images/skybox/Up_Tex.png',
+            url: '../images/skybox/Left_Tex.png',
         },
     ];
 

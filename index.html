@@ -10,6 +10,7 @@
         <script src="scripts/geometry.js"></script>
         <script src="scripts/sceneGraph.js"></script>
         <script src="scripts/solarSystem.js"></script>
+        <script src="scripts/reflection.js"></script>
 
         <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
         <script src="https://webglfundamentals.org/webgl/resources/m4.js"></script>
@@ -142,9 +143,11 @@
         <script  id="skybox-vertex-shader" type="x-shader/x-vertex">
             attribute vec4 a_position;
             varying vec4 v_position;
+
             void main() {
                 v_position = a_position;
-                gl_Position = vec4(a_position.xy, 1, 1);
+                gl_Position = a_position;
+                gl_Position.z = 1.0;
             }
         </script>
         <script  id="skybox-fragment-shader" type="x-shader/x-fragment">
@@ -159,8 +162,51 @@
                 gl_FragColor = textureCube(u_skybox, normalize(t.xyz / t.w));
             }
         </script>
+        <script  id="envmap-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 a_position;
+            attribute vec3 a_normal;
+
+            uniform mat4 u_projection;
+            uniform mat4 u_view;
+            uniform mat4 u_world;
+
+            varying vec3 v_worldPosition;
+            varying vec3 v_worldNormal;
+
+            void main() {
+                // Multiply the position by the matrix.
+                gl_Position = u_projection * u_view * u_world * a_position;
+
+                // send the view position to the fragment shader
+                v_worldPosition = (u_world * a_position).xyz;
+
+                // orient the normals and pass to the fragment shader
+                v_worldNormal = mat3(u_world) * a_normal;
+            }
+        </script>
+        <script  id="envmap-fragment-shader" type="x-shader/x-fragment">
+            precision highp float;
+
+            // Passed in from the vertex shader.
+            varying vec3 v_worldPosition;
+            varying vec3 v_worldNormal;
+
+            // The texture.
+            uniform samplerCube u_texture;
+
+            // The position of the camera
+            uniform vec3 u_worldCameraPosition;
+
+            void main() {
+                vec3 worldNormal = normalize(v_worldNormal);
+                vec3 eyeToSurfaceDir = normalize(v_worldPosition - u_worldCameraPosition);
+                vec3 direction = reflect(eyeToSurfaceDir,worldNormal);
+
+                gl_FragColor = textureCube(u_texture, direction);
+            }
+        </script>
     </head>
-    <body onload="solarSystem()">
+    <body onload="reflection()">
         <div class="container">
             <div class="text-section">
                 <h1>WebGL 3D Graphics Renderer</h1>
