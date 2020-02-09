@@ -127,6 +127,19 @@ function solarSystem() {
     earthOrbitNode.localMatrix = m4.translation(175, 0, 0);  // earth orbit 100 units from the sun
     var moonOrbitNode = new Node();
     moonOrbitNode.localMatrix = m4.translation(30, 0, 0);  // moon 30 units from the earth
+    var cameraNode = new Node();
+    cameraNode.localMatrix = m4.translation(200, 50, 300);
+    
+    var cameraNodeVisual = new Node();
+    cameraNodeVisual.localMatrix = m4.scaling(3, 3, 3);   // make the earth twice as large
+    cameraNodeVisual.drawInfo = {
+        uniforms: {
+            u_colorOffset: [0.6, 0.6, 0, 1],  // blue-green
+            u_colorMult:   [0.8, 0.5, 0.2, 1],
+        },
+        programInfo: programInfo,
+        bufferInfo: sphereBufferInfo,
+    };
 
     var sunNode = new Node();
     sunNode.localMatrix = m4.scaling(5, 5, 5);  // sun a the center
@@ -168,6 +181,8 @@ function solarSystem() {
     earthNode.setParent(earthOrbitNode);
     moonOrbitNode.setParent(earthOrbitNode);
     moonNode.setParent(moonOrbitNode);
+    cameraNode.setParent(earthOrbitNode);
+    cameraNodeVisual.setParent(cameraNode);
 
     var objects = [
         sunNode,
@@ -180,6 +195,13 @@ function solarSystem() {
         earthNode.drawInfo,
         moonNode.drawInfo,
     ];
+    
+    var outsideCam = true;
+    
+    if(outsideCam){
+        objects.push(cameraNodeVisual);
+        objectsToDraw.push(cameraNodeVisual.drawInfo);
+    }
 
     requestAnimationFrame(drawScene);
 
@@ -203,9 +225,28 @@ function solarSystem() {
         var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
         var projectionMatrix =
             m4.perspective(fieldOfViewRadians, aspect, 1, 2000);
+        
+        // update the local matrices for each object.
+        m4.multiply(m4.yRotation(0.01), earthOrbitNode.localMatrix, earthOrbitNode.localMatrix);
+        m4.multiply(m4.yRotation(0.01), moonOrbitNode.localMatrix, moonOrbitNode.localMatrix);
+        // spin the earth
+        m4.multiply(m4.yRotation(0.05), earthNode.localMatrix, earthNode.localMatrix);
+        // spin the moon
+        m4.multiply(m4.yRotation(-0.01), moonNode.localMatrix, moonNode.localMatrix);
+
+        // Update all world matrices in the scene graph
+        solarSystemNode.updateWorldMatrix();
 
         // Compute the camera's matrix using look at.
-        var cameraPosition = [0, -300, 700];
+        //var cameraPosition = cameraNode.worldMatrix;
+        var cameraPosition;
+        if(outsideCam){
+        //cameraPosition = [0, Math.cos(time * .1), 0, Math.sin(time * .1)];
+           cameraPosition = [0, -300, 700];
+        }else{
+            cameraPosition = cameraNode.worldMatrix;
+        }
+         
         var target = [0, 0, 0];
         var up = [0, 0, 1];
         var cameraMatrix = m4.lookAt(cameraPosition, target, up);
@@ -253,18 +294,6 @@ function solarSystem() {
 
         // Draw the geometry.
         gl.drawArrays(gl.TRIANGLES, 0, 1 * 6);
-
-
-        // update the local matrices for each object.
-        m4.multiply(m4.yRotation(0.01), earthOrbitNode.localMatrix, earthOrbitNode.localMatrix);
-        m4.multiply(m4.yRotation(0.01), moonOrbitNode.localMatrix, moonOrbitNode.localMatrix);
-        // spin the earth
-        m4.multiply(m4.yRotation(0.05), earthNode.localMatrix, earthNode.localMatrix);
-        // spin the moon
-        m4.multiply(m4.yRotation(-0.01), moonNode.localMatrix, moonNode.localMatrix);
-
-        // Update all world matrices in the scene graph
-        solarSystemNode.updateWorldMatrix();
 
         // Compute all the matrices for rendering
         objects.forEach(function(object) {
